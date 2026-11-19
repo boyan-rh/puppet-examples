@@ -1,0 +1,3 @@
+---
+- name: Configure Redis installation
+  ansible.builtin.include_tasks: install.yml

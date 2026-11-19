@@ -1,0 +1,14 @@
+---
+- name: Configure verified standalone Redis service  # noqa: L038 - external eloy.redis.redis dependency is declared in this role's requirements.yml but cannot be resolved by the static checker
+  ansible.builtin.include_role:
+    name: eloy.redis.redis
+  no_log: "{{ profile_redis_cluster_secure_logging }}"
+  vars:
+    redis_install_method: package
+    redis_port: "{{ profile_redis_cluster_redis_port }}"
+    redis_requirepass: "{{ profile_redis_cluster_redis_password }}"
+    redis_maxmemory: "{{ profile_redis_cluster_maxmemory_mb }}mb"
+    redis_aof_enabled: true
+    redis_cluster_enabled: false
+    redis_sentinel_enabled: false
+    redis_replication_enabled: false

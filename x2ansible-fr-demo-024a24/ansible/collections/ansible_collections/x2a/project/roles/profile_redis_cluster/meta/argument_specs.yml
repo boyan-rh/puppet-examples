@@ -1,0 +1,26 @@
+---
+argument_specs:
+  main:
+    short_description: Configure a standalone Redis server
+    description:
+      - Installs and configures Redis with password authentication, memory limits, and AOF persistence.
+    options:
+      profile_redis_cluster_redis_port:
+        type: int
+        required: false
+        default: 6379
+        description: TCP port for the Redis listener.
+      profile_redis_cluster_maxmemory_mb:
+        type: int
+        required: false
+        default: 2048
+        description: Maximum Redis memory allocation in megabytes.
+      profile_redis_cluster_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: Whether tasks handling the Redis password suppress output.
+      profile_redis_cluster_redis_password:
+        type: str
+        required: true
+        description: Redis password injected by an Ansible Vault-backed AAP credential.

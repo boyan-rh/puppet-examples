@@ -1,0 +1,5 @@
+---
+# Redis password is injected at runtime from an Ansible Vault-backed credential.
+profile_redis_cluster_redis_port: 6379
+profile_redis_cluster_maxmemory_mb: 2048
+profile_redis_cluster_secure_logging: true

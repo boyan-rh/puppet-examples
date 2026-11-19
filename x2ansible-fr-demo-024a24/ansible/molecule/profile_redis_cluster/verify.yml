@@ -1,0 +1,8 @@
+---
+# Unsupported: Redis instance names, paths, endpoints, service/package names, effective settings,
+# and credentials are not specified by the pre-flight checks; their diagnostic commands state no
+# portable expected outcomes for this scenario.
+- name: Verify profile_redis_cluster
+  hosts: all
+  gather_facts: false
+  tasks: []
