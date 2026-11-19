@@ -1,0 +1,18 @@
+---
+# Controls whether the role manages /etc/motd.
+base_utils_manage_motd: true
+
+# Role-relative Jinja2 template used to render /etc/motd.
+base_utils_motd_template: motd.j2
+
+# Package names to install. OS-family-specific values are loaded from vars.
+base_utils_utility_packages: []
+
+# Service checked by tasks/health_check.yml when it is included.
+base_utils_health_check_service: sshd
+
+# Service restarted by tasks/rolling_restart.yml when it is included.
+base_utils_rolling_restart_service: ''
+
+# Delay between hosts for a rolling restart play (configure the play with serial: 1).
+base_utils_rolling_restart_delay_seconds: 30

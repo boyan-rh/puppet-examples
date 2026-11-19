@@ -1,0 +1,24 @@
+---
+- name: Check whether the system message of the day exists
+  ansible.builtin.stat:
+    path: /etc/motd
+  register: base_utils_motd_file
+  when: base_utils_manage_motd | bool
+
+- name: Manage system message of the day # noqa: L039 - base_utils_motd_file is registered by the preceding stat task
+  ansible.builtin.template:
+    src: "{{ base_utils_motd_template }}" # noqa: R114 - template selected by role-defined default
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+  when:
+    - base_utils_manage_motd | bool
+    - base_utils_motd_file.stat.exists
+
+- name: Install base utility packages
+  ansible.builtin.package:
+    name: "{{ base_utils_utility_packages }}"
+    state: present
+  when: base_utils_utility_packages | length > 0

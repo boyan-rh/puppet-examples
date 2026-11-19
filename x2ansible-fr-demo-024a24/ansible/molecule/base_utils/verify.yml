@@ -1,0 +1,90 @@
+---
+# Unsupported: OS identity has no stated expected value; MOTD content and metadata require
+# validated source values; playbook idempotence requires executing the deployment playbook.
+- name: Verify base_utils pre-flight expectations
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Collect installed package facts for Debian utility package checks
+      ansible.builtin.package_facts:
+        manager: auto
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Assert Debian utility packages are installed
+      ansible.builtin.assert:
+        that:
+          - item_base_utils in ansible_facts['packages']
+        fail_msg: Debian utility package is not installed.
+        success_msg: Debian utility package is installed.
+      loop:
+        - vim
+        - wget
+        - curl
+        - jq
+        - dnsutils
+      loop_control:
+        loop_var: item_base_utils
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Collect installed package facts for RedHat utility package checks
+      ansible.builtin.package_facts:
+        manager: auto
+      when: ansible_facts['os_family'] == 'RedHat'
+
+    - name: Assert RedHat utility packages are installed
+      ansible.builtin.assert:
+        that:
+          - item_base_utils in ansible_facts['packages']
+        fail_msg: RedHat utility package is not installed.
+        success_msg: RedHat utility package is installed.
+      loop:
+        - vim-enhanced
+        - wget
+        - curl
+        - jq
+        - bind-utils
+      loop_control:
+        loop_var: item_base_utils
+      when: ansible_facts['os_family'] == 'RedHat'
+
+    - name: Check managed system MOTD exists
+      ansible.builtin.stat:
+        path: /etc/motd
+      register: base_utils_motd
+      when: base_utils_manage_motd | default(false) | bool
+
+    - name: Assert managed system MOTD is a regular file
+      ansible.builtin.assert:
+        that:
+          - base_utils_motd['stat']['isreg'] | bool
+        fail_msg: Managed system MOTD does not exist as a regular file.
+        success_msg: Managed system MOTD exists as a regular file.
+      when: base_utils_manage_motd | default(false) | bool
+
+    - name: Collect service facts for Chrony and rsyslog checks
+      ansible.builtin.service_facts:
+      when:
+        - ansible_facts['system'] == 'Linux'
+        - >-
+          (profile_base_manage_ntp | default(false) | bool) or
+          (profile_base_manage_syslog | default(false) | bool)
+
+    - name: Assert Chrony service is active
+      ansible.builtin.assert:
+        that:
+          - "ansible_facts['services']['chronyd.service']['state'] == 'running'"
+        fail_msg: Chrony service is not active.
+        success_msg: Chrony service is active.
+      when:
+        - ansible_facts['system'] == 'Linux'
+        - profile_base_manage_ntp | default(false) | bool
+
+    - name: Assert rsyslog service is active
+      ansible.builtin.assert:
+        that:
+          - "ansible_facts['services']['rsyslog.service']['state'] == 'running'"
+        fail_msg: Rsyslog service is not active.
+        success_msg: Rsyslog service is active.
+      when:
+        - ansible_facts['system'] == 'Linux'
+        - profile_base_manage_syslog | default(false) | bool

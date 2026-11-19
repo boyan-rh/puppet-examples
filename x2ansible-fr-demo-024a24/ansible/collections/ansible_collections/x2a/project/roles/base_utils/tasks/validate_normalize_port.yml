@@ -1,0 +1,15 @@
+---
+- name: Validate normalizable port input
+  ansible.builtin.assert:
+    that:
+      - base_utils_normalize_port_input is string or base_utils_normalize_port_input is number
+      - base_utils_normalize_port_input | string is match('^[0-9]+$')
+      - base_utils_normalize_port_input | int >= 1
+      - base_utils_normalize_port_input | int <= 65535
+    fail_msg: >-
+      base_utils_normalize_port_input must be an integer or numeric string from
+      1 through 65535.
+
+- name: Normalize port to an integer # noqa: L039 - input is a role task parameter validated by the preceding assert task
+  ansible.builtin.set_fact:
+    base_utils_normalize_port_result: "{{ base_utils_normalize_port_input | int }}"

@@ -1,0 +1,38 @@
+---
+argument_specs:
+  main:
+    short_description: Manage base utility packages and the system message of the day
+    description:
+      - Manages the optional system MOTD and an OS-specific base utility package set.
+    options:
+      base_utils_manage_motd:
+        type: bool
+        required: false
+        default: true
+        description: Whether to manage the system message of the day.
+      base_utils_motd_template:
+        type: str
+        required: false
+        default: motd.j2
+        description: Role-relative Jinja2 template used to render /etc/motd.
+      base_utils_utility_packages:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: Utility package names to install.
+      base_utils_health_check_service:
+        type: str
+        required: false
+        default: sshd
+        description: Service name to verify when health_check.yml is included.
+      base_utils_rolling_restart_service:
+        type: str
+        required: false
+        default: ""
+        description: Service name to restart when rolling_restart.yml is included.
+      base_utils_rolling_restart_delay_seconds:
+        type: int
+        required: false
+        default: 30
+        description: Delay in seconds between hosts during a rolling restart.

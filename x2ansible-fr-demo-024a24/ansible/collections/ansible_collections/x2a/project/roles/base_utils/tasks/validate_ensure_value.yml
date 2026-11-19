@@ -1,0 +1,19 @@
+---
+- name: Validate ensure-value function inputs
+  ansible.builtin.assert:
+    that:
+      - base_utils_ensure_value_default is string
+      - >-
+        base_utils_ensure_value_input is not defined or
+        base_utils_ensure_value_input is none or
+        base_utils_ensure_value_input is string
+    fail_msg: >-
+      base_utils_ensure_value_input must be a string, null, or undefined, and
+      base_utils_ensure_value_default must be a string.
+
+- name: Apply ensure-value defaulting behavior # noqa: L039 - inputs are role task parameters validated by the preceding assert task
+  ansible.builtin.set_fact:
+    base_utils_ensure_value_result: >-
+      {{ base_utils_ensure_value_default
+        if (base_utils_ensure_value_input | default('', true)) == ''
+        else base_utils_ensure_value_input }}

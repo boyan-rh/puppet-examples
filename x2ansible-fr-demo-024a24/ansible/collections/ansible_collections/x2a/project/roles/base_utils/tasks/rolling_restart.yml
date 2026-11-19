@@ -1,0 +1,43 @@
+---
+- name: Validate requested service for restart
+  ansible.builtin.assert:
+    that:
+      - base_utils_rolling_restart_service | length > 0
+    fail_msg: base_utils_rolling_restart_service must name a service to restart.
+
+- name: Gather service facts before restart
+  ansible.builtin.service_facts:
+
+- name: Verify requested service exists before restart
+  ansible.builtin.assert:
+    that:
+      - >-
+        base_utils_rolling_restart_service in ansible_facts['services'] or
+        (base_utils_rolling_restart_service ~ '.service') in ansible_facts['services']
+    fail_msg: >-
+      Service {{ base_utils_rolling_restart_service }} is not installed or is not
+      known to the service manager.
+
+- name: Restart requested service
+  ansible.builtin.service:
+    name: "{{ base_utils_rolling_restart_service }}"
+    state: restarted
+
+- name: Gather service facts after restart
+  ansible.builtin.service_facts:
+
+- name: Verify requested service is running
+  ansible.builtin.assert:
+    that:
+      - >-
+        (ansible_facts['services'].get(
+        base_utils_rolling_restart_service ~ '.service',
+        ansible_facts['services'].get(base_utils_rolling_restart_service, {})).state
+        | default('stopped')) == 'running'
+    fail_msg: "Service {{ base_utils_rolling_restart_service }} failed to restart."
+    success_msg: "Service {{ base_utils_rolling_restart_service }} is running."
+
+- name: Wait before proceeding to the next host
+  ansible.builtin.pause:
+    seconds: "{{ base_utils_rolling_restart_delay_seconds }}"
+  when: base_utils_rolling_restart_delay_seconds | int > 0

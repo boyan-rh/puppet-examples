@@ -1,0 +1,10 @@
+---
+- name: Validate syslog severity level
+  ansible.builtin.assert:
+    that:
+      - >-
+        base_utils_log_level in
+        ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency']
+    fail_msg: >-
+      base_utils_log_level must be a standard syslog severity: debug, info,
+      notice, warning, error, critical, alert, or emergency.

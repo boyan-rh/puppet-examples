@@ -1,0 +1,26 @@
+---
+- name: Gather service facts for health check
+  ansible.builtin.service_facts:
+
+- name: Determine requested service health
+  ansible.builtin.set_fact:
+    base_utils_health_check_status: >-
+      {{ 'running'
+        if (ansible_facts['services'].get(
+          base_utils_health_check_service ~ '.service',
+          ansible_facts['services'].get(base_utils_health_check_service, {}))['state']
+          | default('stopped')) == 'running'
+        else 'not running' }}
+
+- name: Report unhealthy requested service # noqa: L039 - status is registered by the preceding set_fact task
+  ansible.builtin.debug:
+    msg: "Service {{ base_utils_health_check_service }} is not running."
+  when: base_utils_health_check_status != 'running'
+  changed_when: false
+
+- name: Fail when requested service is unhealthy
+  ansible.builtin.assert:
+    that:
+      - base_utils_health_check_status == 'running'
+    fail_msg: "Service {{ base_utils_health_check_service }} is not running."
+    success_msg: "Service {{ base_utils_health_check_service }} is running."

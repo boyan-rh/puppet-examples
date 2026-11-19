@@ -1,0 +1,10 @@
+---
+- name: Validate ensure value
+  ansible.builtin.assert:
+    that:
+      - >-
+        base_utils_ensure_value in
+        ['present', 'absent', 'installed', 'latest', 'purged']
+    fail_msg: >-
+      base_utils_ensure_value must be one of present, absent, installed, latest,
+      or purged.

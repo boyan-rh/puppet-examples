@@ -1,0 +1,8 @@
+---
+- name: Validate network port
+  ansible.builtin.assert:
+    that:
+      - base_utils_port is number
+      - base_utils_port | int >= 1
+      - base_utils_port | int <= 65535
+    fail_msg: "base_utils_port must be an integer from 1 through 65535."
