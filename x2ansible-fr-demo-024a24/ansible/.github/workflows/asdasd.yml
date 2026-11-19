@@ -1,0 +1,13 @@
+---
+name: asdasd
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  asdasd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: asdasd
+        run: echo asdasd

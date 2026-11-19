@@ -1,0 +1,5 @@
+---
+- name: Install PostgreSQL server and development packages
+  ansible.builtin.package:
+    name: "{{ postgresql_package_names + ['libpq-dev'] }}"
+    state: present

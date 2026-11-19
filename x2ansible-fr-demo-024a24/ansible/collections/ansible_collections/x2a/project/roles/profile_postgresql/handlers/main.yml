@@ -1,0 +1,3 @@
+---
+# This role does not define handlers because its source does not manage PostgreSQL configuration files.
+[]

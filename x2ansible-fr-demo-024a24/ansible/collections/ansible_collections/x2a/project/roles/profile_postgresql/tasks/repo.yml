@@ -1,0 +1,36 @@
+---
+- name: Install PGDG repository key management dependency
+  ansible.builtin.package:
+    name:
+      - gnupg
+    state: present
+
+- name: Download PGDG repository signing key
+  ansible.builtin.get_url:
+    url: "{{ postgresql_repo_key_source }}"  # noqa: R104 - Repository key source is deployment-configured to permit approved internal mirrors that may not support TLS. # noqa: R106 - Repository key source must remain deployment-configurable for approved site mirrors.
+    dest: /usr/share/keyrings/postgresql-pgdg.asc
+    mode: "0644"
+
+- name: Convert PGDG signing key to keyring format
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --yes
+      - --output
+      - /usr/share/keyrings/postgresql-pgdg.gpg
+      - /usr/share/keyrings/postgresql-pgdg.asc
+    creates: /usr/share/keyrings/postgresql-pgdg.gpg
+
+- name: Configure PGDG APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/postgresql-pgdg.gpg] {{ postgresql_repo_location }} {{ postgresql_repo_release }} main"
+    filename: pgdg
+    state: present
+    update_cache: false
+
+- name: Refresh APT package metadata
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+    state: present

@@ -1,0 +1,6 @@
+---
+# PostgreSQL major version. Override in inventory to select a site-specific version.
+postgresql_version: '16'
+
+# Hide output for tasks that process credentials injected by AAP.
+profile_postgresql_secure_logging: true

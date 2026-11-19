@@ -1,0 +1,120 @@
+---
+# Unsupported pre-flight diagnostics: the OS suite has no expected codename; exact package
+# versions are not specified; apt-get update changes APT metadata; cron output has no expected value.
+- name: Verify profile_postgresql migration
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Gather PostgreSQL service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert postgresql service is active
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['services']['postgresql.service']['state'] == 'running'
+        fail_msg: postgresql service is not active.
+        success_msg: postgresql service is active.
+
+    - name: Check postgresql service is enabled
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - is-enabled
+          - postgresql
+      changed_when: false
+      register: profile_postgresql_service_enabled
+
+    - name: Assert postgresql service is enabled
+      ansible.builtin.assert:
+        that:
+          - profile_postgresql_service_enabled['rc'] == 0
+          - profile_postgresql_service_enabled['stdout'] == 'enabled'
+        fail_msg: postgresql service is not enabled.
+        success_msg: postgresql service is enabled.
+
+    - name: Check PostgreSQL accepts connections on localhost port 5432
+      ansible.builtin.command:
+        argv:
+          - pg_isready
+          - -h
+          - localhost
+          - -p
+          - '5432'
+      changed_when: false
+      register: profile_postgresql_readiness
+
+    - name: Assert PostgreSQL accepts connections on localhost port 5432
+      ansible.builtin.assert:
+        that:
+          - profile_postgresql_readiness['rc'] == 0
+        fail_msg: PostgreSQL does not accept connections on localhost port 5432.
+        success_msg: PostgreSQL accepts connections on localhost port 5432.
+
+    - name: Query for application database role testuser
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -tAc
+          - "SELECT 1 FROM pg_roles WHERE rolname = 'testuser';"
+      become: true
+      become_user: postgres
+      changed_when: false
+      register: profile_postgresql_role_query
+
+    - name: Assert application database role testuser exists
+      ansible.builtin.assert:
+        that:
+          - profile_postgresql_role_query['stdout'] | trim == '1'
+        fail_msg: Application database role testuser does not exist.
+        success_msg: Application database role testuser exists.
+
+    - name: Query for application database testdb
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -tAc
+          - "SELECT 1 FROM pg_database WHERE datname = 'testdb';"
+      become: true
+      become_user: postgres
+      changed_when: false
+      register: profile_postgresql_database_query
+
+    - name: Assert application database testdb exists
+      ansible.builtin.assert:
+        that:
+          - profile_postgresql_database_query['stdout'] | trim == '1'
+        fail_msg: Application database testdb does not exist.
+        success_msg: Application database testdb exists.
+
+    - name: Query testuser CONNECT privilege on testdb
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -d
+          - testdb
+          - -tAc
+          - "SELECT has_database_privilege('testuser', 'testdb', 'CONNECT');"
+      become: true
+      become_user: postgres
+      changed_when: false
+      register: profile_postgresql_privilege_query
+
+    - name: Assert testuser has CONNECT privilege on testdb
+      ansible.builtin.assert:
+        that:
+          - profile_postgresql_privilege_query['stdout'] | trim == 't'
+        fail_msg: testuser does not have CONNECT privilege on testdb.
+        success_msg: testuser has CONNECT privilege on testdb.
+
+    - name: Inspect database backup artifact
+      ansible.builtin.stat:
+        path: /usr/local/bin/db-backup.sh
+      register: profile_postgresql_backup_artifact
+
+    - name: Assert database backup artifact is executable
+      ansible.builtin.assert:
+        that:
+          - profile_postgresql_backup_artifact['stat']['exists']
+          - profile_postgresql_backup_artifact['stat']['executable']
+        fail_msg: Database backup artifact is not executable.
+        success_msg: Database backup artifact is executable.
