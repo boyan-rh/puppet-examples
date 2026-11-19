@@ -1,0 +1,14 @@
+{
+  "phase": "migrate",
+  "agents_run": 1,
+  "total_findings": 2,
+  "total_critical_findings": 2,
+  "agents": [
+    {
+      "name": "Dangerous Operations",
+      "findings": 2,
+      "critical_findings": 2,
+      "summary": "The analysis identifies two critical operational risks: enabling a host-wide UFW firewall by default without preserving management or dependent-service access, and unconditionally restarting HAProxy after configuration changes without graceful rollout or availability safeguards."
+    }
+  ]
+}
