@@ -1,0 +1,32 @@
+[
+  {
+    "name": "base_utils",
+    "path": "site-modules/base_utils",
+    "description": "Provides a common operating-system utility baseline, including Hiera-defined packages and an ERB-managed MOTD. It also includes supporting custom facts, helpers, and Bolt automation assets.",
+    "technology": "Puppet"
+  },
+  {
+    "name": "profile_app_stack",
+    "path": "site-modules/profile_app_stack",
+    "description": "Orchestrates a Python application stack from runtime and database prerequisites through application deployment, systemd service, and monitoring. Configuration is Hiera-driven and includes Git, database, logging, backup, and health-check settings.",
+    "technology": "Puppet"
+  },
+  {
+    "name": "profile_haproxy",
+    "path": "site-modules/profile_haproxy",
+    "description": "Installs, configures, services, and firewall-enables HAProxy with optional backend discovery. It renders multi-backend configuration from Hiera data and manages static HTTP error pages.",
+    "technology": "Puppet"
+  },
+  {
+    "name": "profile_postgresql",
+    "path": "site-modules/profile_postgresql",
+    "description": "Configures the PGDG APT repository, installs version-specific PostgreSQL server, contrib, and client development packages, and manages the PostgreSQL service.",
+    "technology": "Puppet"
+  },
+  {
+    "name": "profile_redis_cluster",
+    "path": "site-modules/profile_redis_cluster",
+    "description": "Deploys Redis by delegating server management to the external puppet-redis module and queries PuppetDB for nodes assigned the Redis profile.",
+    "technology": "Puppet"
+  }
+]
