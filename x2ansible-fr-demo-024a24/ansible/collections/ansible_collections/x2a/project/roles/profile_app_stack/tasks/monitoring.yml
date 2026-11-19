@@ -1,0 +1,30 @@
+---
+- name: Install production Prometheus packages
+  ansible.builtin.package:
+    name:
+      - prometheus-node-exporter
+      - prometheus-pushgateway
+    state: present
+  when: "'production' in group_names"
+
+- name: Enable and start Prometheus node exporter
+  ansible.builtin.service:
+    name: prometheus-node-exporter
+    enabled: true
+    state: started
+  when: "'production' in group_names"
+
+- name: Schedule production application metrics push
+  ansible.builtin.cron:
+    name: push_app_metrics
+    user: "{{ app_stack_app_user }}"
+    job: LOG_DIR={{ app_stack_log_dir }} /usr/local/bin/app-healthcheck.sh --push-metrics
+    minute: "*/5"
+  when: "'production' in group_names"
+
+- name: Schedule application health check
+  ansible.builtin.cron:
+    name: app_health_check
+    user: root
+    job: LOG_DIR={{ app_stack_log_dir }} /usr/local/bin/app-healthcheck.sh http://localhost:{{ app_stack_app_port }}/health
+    minute: "*/2"

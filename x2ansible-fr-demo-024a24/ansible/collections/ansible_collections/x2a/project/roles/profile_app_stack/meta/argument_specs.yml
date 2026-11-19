@@ -1,0 +1,152 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the test-app Python application stack
+    description:
+      - Installs Python and PostgreSQL dependencies, deploys test-app, and configures service and monitoring jobs.
+    options:
+      app_stack_app_name:
+        type: str
+        required: false
+        default: test-app
+        description: Application and systemd service name.
+      app_stack_app_repo:
+        type: str
+        required: false
+        default: file:///tmp/test-app-repo
+        description: Git repository URL for the application source.
+      app_stack_app_revision:
+        type: str
+        required: false
+        default: master
+        description: Git revision to deploy.
+      app_stack_app_port:
+        type: int
+        required: false
+        default: 8000
+        description: TCP port on which the application listens.
+      app_stack_app_dir:
+        type: str
+        required: false
+        default: /opt/test-app
+        description: Application deployment directory.
+      app_stack_app_user:
+        type: str
+        required: false
+        default: appuser
+        description: System user that owns and runs the application.
+      app_stack_app_group:
+        type: str
+        required: false
+        default: appuser
+        description: System group for application files.
+      app_stack_python_version:
+        type: str
+        required: false
+        default: python3
+        description: Python package and interpreter command.
+      app_stack_pip_packages:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: Additional Python packages to install in the virtual environment.
+      app_stack_db_host:
+        type: str
+        required: false
+        default: localhost
+        description: Default database host when no credential override is injected.
+      app_stack_db_port:
+        type: int
+        required: false
+        default: 5432
+        description: Default database port when no credential override is injected.
+      app_stack_db_name:
+        type: str
+        required: false
+        default: testdb
+        description: Default database name when no credential override is injected.
+      app_stack_db_user:
+        type: str
+        required: false
+        default: testuser
+        description: Default database role when no credential override is injected.
+      app_stack_postgresql_version:
+        type: str
+        required: false
+        default: "15"
+        description: PostgreSQL major version to install.
+      app_stack_postgresql_service_name:
+        type: str
+        required: false
+        default: postgresql
+        description: PostgreSQL system service name.
+      app_stack_worker_count:
+        type: int
+        required: false
+        default: 2
+        description: Number of Gunicorn workers.
+      app_stack_worker_class:
+        type: str
+        required: false
+        default: sync
+        description: Gunicorn worker class.
+      app_stack_max_requests:
+        type: int
+        required: false
+        default: 1000
+        description: Maximum requests per Gunicorn worker.
+      app_stack_graceful_timeout:
+        type: int
+        required: false
+        default: 30
+        description: Gunicorn graceful shutdown timeout in seconds.
+      app_stack_log_dir:
+        type: str
+        required: false
+        default: /var/log/test-app
+        description: Directory for application logs.
+      app_stack_log_level:
+        type: str
+        required: false
+        default: info
+        description: Application log verbosity.
+      app_stack_log_max_size:
+        type: str
+        required: false
+        default: 100M
+        description: Maximum log size before rotation.
+      app_stack_log_rotate_count:
+        type: int
+        required: false
+        default: 7
+        description: Number of rotated logs to retain.
+      app_stack_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: Whether tasks handling AAP-injected secrets suppress task output.
+      db_host:
+        type: str
+        required: true
+        description: Database host injected by the AAP credential type.
+      db_port:
+        type: int
+        required: true
+        description: Database port injected by the AAP credential type.
+      db_name:
+        type: str
+        required: true
+        description: Database name injected by the AAP credential type.
+      db_user:
+        type: str
+        required: true
+        description: Database user injected by the AAP credential type.
+      db_password:
+        type: str
+        required: true
+        description: Secret database password injected by the AAP credential type.
+      secret_key:
+        type: str
+        required: true
+        description: Secret application key injected by the AAP credential type.

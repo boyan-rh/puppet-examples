@@ -1,0 +1,381 @@
+{
+  "module_name": "profile_app_stack",
+  "items": [
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/run_profile_app_stack.yml",
+      "status": "pending",
+      "description": "Deployment entry point for the migrated role",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/requirements.yml",
+      "status": "pending",
+      "description": "Test-only Podman collection dependency",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/README.md",
+      "status": "pending",
+      "description": "Developer instructions for running Molecule",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/profile_app_stack/molecule.yml",
+      "status": "pending",
+      "description": "Ansible-native Molecule scenario configuration",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/profile_app_stack/inventory/hosts.yml",
+      "status": "pending",
+      "description": "Disposable Podman target inventory",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/profile_app_stack/create.yml",
+      "status": "pending",
+      "description": "Create and inspect disposable Podman targets",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/profile_app_stack/destroy.yml",
+      "status": "pending",
+      "description": "Remove disposable Podman targets",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/profile_app_stack/prepare.yml",
+      "status": "pending",
+      "description": "Bootstrap Python on the disposable Linux target",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/profile_app_stack/converge.yml",
+      "status": "pending",
+      "description": "Run the deployment playbook under test",
+      "notes": ""
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/molecule/profile_app_stack/verify.yml",
+      "status": "pending",
+      "description": "Verify migrated behavior against the source plan",
+      "notes": ""
+    },
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/aap-configuration/controller_credential_types.yml",
+      "status": "complete",
+      "description": "AAP credential types configuration",
+      "notes": ""
+    },
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/aap-configuration/controller_credentials.yml",
+      "status": "complete",
+      "description": "AAP credentials configuration",
+      "notes": ""
+    },
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/validate_credentials.yml",
+      "status": "complete",
+      "description": "Credential validation tasks",
+      "notes": ""
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/meta/main.yml",
+      "status": "complete",
+      "description": "Role metadata; no metadata.rb is supplied.",
+      "notes": "Created standard meta/main.yml"
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/handlers/main.yml",
+      "status": "complete",
+      "description": "Handlers for daemon reload and ordered test-app restarts.",
+      "notes": "Created systemd reload and application restart handlers."
+    },
+    {
+      "category": "structure",
+      "source_path": "data/common.yaml",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/defaults/main.yml",
+      "status": "complete",
+      "description": "Role defaults from effective control-repository common Hiera data; move secrets to Vault.",
+      "notes": "Migrated effective control-repository values and added PostgreSQL service default; secret values are supplied through AAP credentials."
+    },
+    {
+      "category": "structure",
+      "source_path": "defaults/main.yml",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/meta/argument_specs.yml",
+      "status": "complete",
+      "description": "Role argument specs for fail-fast parameter validation; generate after defaults/main.yml.",
+      "notes": "Generated argument specifications for role defaults and required AAP credential variables."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_app_stack/manifests/init.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/main.yml",
+      "status": "complete",
+      "description": "Ordered application-stack entry point and runtime database-URL derivation.",
+      "notes": "Migrated ordered phase orchestration and generated in-memory encoded PostgreSQL URL from AAP credentials."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_app_stack/manifests/python.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/python.yml",
+      "status": "complete",
+      "description": "Python packages, app user/group, log directory, and logrotate setup.",
+      "notes": "Migrated Python dependency, account, log directory, and logrotate resources."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_app_stack/manifests/database.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "PGDG/PostgreSQL setup, local role/database privileges, backup installation, and schedule.",
+      "notes": "Migrated local PostgreSQL provisioning, backup script, and scheduled backup."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_app_stack/manifests/app.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/app.yml",
+      "status": "complete",
+      "description": "Git deployment, virtualenv/dependencies, secret environment, health check, and change-triggered Alembic migrations.",
+      "notes": "Migrated deployment, virtualenv, requirements, secret environment, health-check script, and conditional Alembic migrations."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_app_stack/manifests/service.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/service.yml",
+      "status": "complete",
+      "description": "Systemd unit lifecycle with daemon reload and restart notifications.",
+      "notes": "Migrated systemd unit rendering, handler flush for daemon reload ordering, and service enablement."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_app_stack/manifests/monitoring.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/monitoring.yml",
+      "status": "complete",
+      "description": "Always-on health-check cron and production-group-gated Prometheus resources/metrics cron.",
+      "notes": "Migrated production-group-gated Prometheus resources and universal health-check cron."
+    },
+    {
+      "category": "templates",
+      "source_path": "profile_app_stack/logrotate.conf.erb",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/templates/logrotate.conf.j2",
+      "status": "complete",
+      "description": "Reconstruct/inspect missing logrotate source before Jinja2 conversion; preserve rotation behavior.",
+      "notes": "Converted verified ERB logrotate template to Jinja2."
+    },
+    {
+      "category": "templates",
+      "source_path": "profile_app_stack/app.env.erb",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/templates/app.env.j2",
+      "status": "complete",
+      "description": "Secret-bearing application environment template; preserve conditional/escaping behavior and render with no_log.",
+      "notes": "Converted verified ERB environment template; production conditional is inventory-group based."
+    },
+    {
+      "category": "templates",
+      "source_path": "profile_app_stack/app.service.epp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/templates/app.service.j2",
+      "status": "complete",
+      "description": "Reconstruct/inspect systemd EPP source; preserve ExecStart, EnvironmentFile, restart policy, and conditional directives.",
+      "notes": "Converted verified EPP systemd unit to Jinja2, preserving the computed stop timeout."
+    },
+    {
+      "category": "files",
+      "source_path": "puppet:///modules/profile_app_stack/backup.sh",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/files/db-backup.sh",
+      "status": "complete",
+      "description": "Locate or reconstruct before migration; retain backup, retention, permissions, and restore-validation behavior.",
+      "notes": "Copied supplied Puppet module static backup script."
+    },
+    {
+      "category": "files",
+      "source_path": "puppet:///modules/profile_app_stack/healthcheck.sh",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/files/app-healthcheck.sh",
+      "status": "complete",
+      "description": "Locate or reconstruct before migration; retain HTTP check and production metrics-push behavior.",
+      "notes": "Copied supplied Puppet module static health-check script."
+    },
+    {
+      "category": "attributes",
+      "source_path": "site-modules/profile_app_stack/data/common.yaml",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/defaults/main.yml",
+      "status": "complete",
+      "description": "Module fallback variables, including effective log rotation values; explicitly resolve Python version and pip package behavior.",
+      "notes": "Migrated effective application defaults and module log rotation fallback values; secrets are sourced from AAP credentials."
+    },
+    {
+      "category": "attributes",
+      "source_path": "site-modules/profile_app_stack/data/environment/production.yaml",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/vars/production.yml",
+      "status": "complete",
+      "description": "Currently overridden production values; retain only as intentional production inventory/group overrides and vault any retained secret.",
+      "notes": "Migrated non-secret legacy production overrides; encrypted secret key is supplied by AAP credentials."
+    },
+    {
+      "category": "attributes",
+      "source_path": "site-modules/profile_app_stack/data/environment/staging.yaml",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/vars/staging.yml",
+      "status": "complete",
+      "description": "Currently overridden staging values; retain only as intentional staging inventory/group overrides and vault the secret.",
+      "notes": "Migrated non-secret legacy staging overrides; plaintext secret key is replaced by the AAP credential variable."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_postgresql/manifests/init.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Supporting PostgreSQL profile ordering incorporated by local database tasks.",
+      "notes": "Integrated repository, installation, and service ordering into the consolidated database task file."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_postgresql/manifests/repo.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Supporting PGDG repository configuration; verify repository inputs and target OS.",
+      "notes": "Integrated PGDG signing key and repository configuration into the consolidated database task file."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_postgresql/manifests/install.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Supporting PostgreSQL package installation; verify PostgreSQL 15 package names.",
+      "notes": "Integrated PostgreSQL server, client, libpq, and psycopg2 package installation into database tasks."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile_postgresql/manifests/service.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Supporting PostgreSQL service enablement; verify service unit name.",
+      "notes": "Integrated PostgreSQL service enablement and startup into database tasks."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/role/manifests/app_server.pp",
+      "target_path": "ansible/run_profile_app_stack.yml",
+      "status": "complete",
+      "description": "Wrapper composition; translate application-stack assignment and explicitly coordinate surrounding roles where applicable.",
+      "notes": "Created app-server entry playbook for the migrated application-stack role; sibling base, HAProxy, and Redis profiles are separate migrations."
+    },
+    {
+      "category": "recipes",
+      "source_path": "site-modules/profile/manifests/app/stack.pp",
+      "target_path": "ansible/run_profile_app_stack.yml",
+      "status": "complete",
+      "description": "Application-stack wrapper composition; environment parameter is unused downstream.",
+      "notes": "Integrated thin profile wrapper into the application-stack entry playbook."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/init.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Supporting APT entry point for PGDG repository setup.",
+      "notes": "Integrated Debian validation, repository prerequisites, PGDG configuration, and controlled package index refresh into database tasks."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/params.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Inspect inherited OS-specific APT defaults used by PGDG configuration.",
+      "notes": "Retained applicable Debian APT path and key-management defaults through explicit PGDG repository tasks; unused proxy and purge settings are not configured."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/update.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Controlled APT cache refresh behavior for PGDG configuration.",
+      "notes": "Replaced timestamp-fact refresh behavior with bounded apt cache refresh in database prerequisites."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/conf.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Review supporting APT configuration behavior; configure only required PGDG settings.",
+      "notes": "No configured custom APT conf resources were supplied; PGDG-specific requirements are directly managed in database tasks."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/setting.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Review source-list setting behavior used for PGDG repository management.",
+      "notes": "No supplied APT settings require conversion; repository configuration is managed declaratively with apt_repository."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/source.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "PGDG source configuration using idempotent repository management.",
+      "notes": "Replaced the configured PGDG Apt source with a signed apt_repository resource."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/key.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "PGDG signing-key management; inspect local collector ordering and refresh behavior.",
+      "notes": "Replaced deprecated apt-key handling and collector ordering with a signed keyring downloaded before repository creation."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/keyring.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Review optional keyring branch; apply only if target PGDG policy requires it.",
+      "notes": "Migrated relevant PGDG keyring behavior using get_url into /etc/apt/keyrings with root ownership."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/pin.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Review optional APT pin behavior; apply only if target policy requires it.",
+      "notes": "No configured Apt pin resources were supplied, so no pin preferences are managed."
+    },
+    {
+      "category": "recipes",
+      "source_path": "migration-dependencies/apt/manifests/ppa.pp",
+      "target_path": "ansible/collections/ansible_collections/x2a/project/roles/profile_app_stack/tasks/database.yml",
+      "status": "complete",
+      "description": "Review optional PPA behavior; do not configure absent effective inputs.",
+      "notes": "No PPA resources were supplied; no Ubuntu PPA is configured."
+    }
+  ]
+}

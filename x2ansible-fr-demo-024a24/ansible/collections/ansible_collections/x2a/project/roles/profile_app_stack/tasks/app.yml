@@ -1,0 +1,91 @@
+---
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ app_stack_app_dir }}" # noqa: R114 - path is role-defined configuration
+    owner: "{{ app_stack_app_user }}"
+    group: "{{ app_stack_app_group }}"
+    mode: "0755"
+    state: directory
+
+- name: Check out application repository
+  ansible.builtin.git:
+    repo: "{{ app_stack_app_repo }}" # noqa: R114 - repository is role-defined configuration
+    dest: "{{ app_stack_app_dir }}" # noqa: R114 - destination is role-defined configuration
+    version: "{{ app_stack_app_revision }}"
+  register: app_stack_git_checkout
+  notify: Restart application
+  become: true
+  become_user: "{{ app_stack_app_user }}"
+
+- name: Create application virtual environment
+  ansible.builtin.command:
+    argv:
+      - "{{ app_stack_python_version }}"
+      - -m
+      - venv
+      - "{{ app_stack_app_dir }}/venv"
+    creates: "{{ app_stack_app_dir }}/venv/bin/activate" # noqa: R114 - path is role-defined configuration
+  become: true
+  become_user: "{{ app_stack_app_user }}"
+
+- name: Install application requirements
+  ansible.builtin.pip:
+    requirements: "{{ app_stack_app_dir }}/requirements.txt" # noqa: R114 - path is role-defined configuration
+    virtualenv: "{{ app_stack_app_dir }}/venv" # noqa: R114 - path is role-defined configuration
+    virtualenv_command: "{{ app_stack_python_version }} -m venv"
+  notify: Restart application
+  become: true
+  become_user: "{{ app_stack_app_user }}"
+
+- name: Install configured additional Python packages
+  ansible.builtin.pip:
+    name: "{{ app_stack_pip_packages }}"
+    virtualenv: "{{ app_stack_app_dir }}/venv" # noqa: R114 - path is role-defined configuration
+    state: present
+  when: app_stack_pip_packages | length > 0
+  become: true
+  become_user: "{{ app_stack_app_user }}"
+
+- name: Render application environment
+  ansible.builtin.template:
+    src: app.env.j2
+    dest: "{{ app_stack_app_dir }}/.env" # noqa: R114 - path is role-defined configuration
+    owner: "{{ app_stack_app_user }}"
+    group: "{{ app_stack_app_group }}"
+    mode: "0600"
+    backup: true
+  notify: Restart application
+  no_log: "{{ app_stack_secure_logging }}"
+
+- name: Install application health-check script
+  ansible.builtin.copy:
+    src: app-healthcheck.sh
+    dest: /usr/local/bin/app-healthcheck.sh
+    owner: root
+    group: root
+    mode: "0755"
+    backup: true
+
+- name: Check for Alembic migration environment
+  ansible.builtin.stat:
+    path: "{{ app_stack_app_dir }}/migrations/env.py" # noqa: R114 - path is role-defined configuration
+  register: app_stack_migrations_environment
+
+- name: Run Alembic migrations after a repository change
+  ansible.builtin.command:
+    argv:
+      - "{{ app_stack_app_dir }}/venv/bin/python"
+      - -m
+      - alembic
+      - upgrade
+      - head
+    chdir: "{{ app_stack_app_dir }}" # noqa: R114 - path is role-defined configuration
+  when:
+    - app_stack_git_checkout.changed
+    - app_stack_migrations_environment.stat.exists
+  notify: Restart application
+  become: true
+  become_user: "{{ app_stack_app_user }}"
+  no_log: "{{ app_stack_secure_logging }}"
+  environment:
+    DATABASE_URL: "{{ app_stack_db_url }}"

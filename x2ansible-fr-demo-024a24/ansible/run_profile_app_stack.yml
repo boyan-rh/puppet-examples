@@ -1,0 +1,7 @@
+---
+- name: Apply profile application stack
+  hosts: app_servers
+  become: true
+  gather_facts: true
+  roles:
+    - role: x2a.project.profile_app_stack

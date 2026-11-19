@@ -1,0 +1,45 @@
+# Systemd unit for {{ app_stack_app_name }}
+# Managed by Ansible — do not edit manually
+
+[Unit]
+Description={{ app_stack_app_name }} Application Server
+Documentation=https://wiki.internal.example.com/apps/{{ app_stack_app_name }}
+After=network.target {{ app_stack_postgresql_service_name }}
+Wants={{ app_stack_postgresql_service_name }}
+
+[Service]
+Type=simple
+User={{ app_stack_app_user }}
+Group={{ app_stack_app_group }}
+WorkingDirectory={{ app_stack_app_dir }}
+EnvironmentFile={{ app_stack_app_dir }}/.env
+
+ExecStart={{ app_stack_app_dir }}/venv/bin/gunicorn \
+    --bind 0.0.0.0:{{ app_stack_app_port }} \
+    --workers {{ app_stack_worker_count }} \
+    --worker-class {{ app_stack_worker_class }} \
+    --max-requests {{ app_stack_max_requests }} \
+    --max-requests-jitter 50 \
+    --graceful-timeout {{ app_stack_graceful_timeout }} \
+    --access-logfile {{ app_stack_log_dir }}/access.log \
+    --error-logfile {{ app_stack_log_dir }}/error.log \
+    --log-level {{ app_stack_log_level }} \
+    app.main:app
+
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec={{ app_stack_graceful_timeout + 5 }}
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:{{ app_stack_log_dir }}/stdout.log
+StandardError=append:{{ app_stack_log_dir }}/stderr.log
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths={{ app_stack_app_dir }} {{ app_stack_log_dir }}
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

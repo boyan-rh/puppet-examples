@@ -1,0 +1,23 @@
+---
+- name: Validate credential variables
+  ansible.builtin.include_tasks: validate_credentials.yml
+
+- name: Build application database URL
+  ansible.builtin.set_fact:
+    app_stack_db_url: postgresql://{{ db_user | urlencode }}:{{ db_password | urlencode }}@{{ db_host }}:{{ db_port }}/{{ db_name | urlencode }}
+  no_log: "{{ app_stack_secure_logging }}"
+
+- name: Configure Python runtime
+  ansible.builtin.include_tasks: python.yml
+
+- name: Configure local PostgreSQL database
+  ansible.builtin.include_tasks: database.yml
+
+- name: Deploy application
+  ansible.builtin.include_tasks: app.yml
+
+- name: Configure application service
+  ansible.builtin.include_tasks: service.yml
+
+- name: Configure monitoring and health checks
+  ansible.builtin.include_tasks: monitoring.yml

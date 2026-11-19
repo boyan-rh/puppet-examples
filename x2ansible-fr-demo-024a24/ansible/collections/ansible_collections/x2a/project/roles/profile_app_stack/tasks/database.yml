@@ -1,0 +1,136 @@
+---
+- name: Require a Debian-family operating system for local PostgreSQL
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+    fail_msg: Local PostgreSQL provisioning requires a Debian-family platform.
+  when: app_stack_db_host == 'localhost'
+
+- name: Install PGDG repository prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  when: app_stack_db_host == 'localhost'
+
+- name: Create APT keyring directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+  when: app_stack_db_host == 'localhost'
+
+- name: Install PostgreSQL signing key
+  ansible.builtin.get_url:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    dest: /etc/apt/keyrings/postgresql.asc
+    owner: root
+    group: root
+    mode: "0644"
+  when: app_stack_db_host == 'localhost'
+
+- name: Configure PGDG repository
+  ansible.builtin.apt_repository:
+    repo: deb [signed-by=/etc/apt/keyrings/postgresql.asc] https://apt.postgresql.org/pub/repos/apt {{ ansible_facts['distribution_release'] }}-pgdg main
+    filename: pgdg
+    state: present
+    update_cache: true
+  when: app_stack_db_host == 'localhost'
+
+- name: Install PostgreSQL client for database backup operations
+  ansible.builtin.package:
+    name: postgresql-client
+    state: present
+
+- name: Install PostgreSQL server, client, and development dependencies
+  ansible.builtin.package:
+    name:
+      - postgresql-{{ app_stack_postgresql_version }} # noqa: R114 - package is role-defined configuration
+      - postgresql-client-{{ app_stack_postgresql_version }} # noqa: R114 - package is role-defined configuration
+      - libpq-dev
+      - python3-psycopg2
+    state: present
+  when: app_stack_db_host == 'localhost'
+
+- name: Enable and start PostgreSQL
+  ansible.builtin.service:
+    name: "{{ app_stack_postgresql_service_name }}" # noqa: R114 - service name is role-defined configuration
+    enabled: true
+    state: started
+  when: app_stack_db_host == 'localhost'
+
+- name: Create application PostgreSQL role
+  ansible.builtin.shell:
+    cmd: |-
+      psql --set=ON_ERROR_STOP=1 --username=postgres --dbname=postgres \
+        --set=db_user="$db_user" --set=db_password="$db_password" \
+        --command "SELECT set_config('app_stack.db_user', :'db_user', false), set_config('app_stack.db_password', :'db_password', false); DO \$\$ DECLARE role_name text := current_setting('app_stack.db_user'); role_password text := current_setting('app_stack.db_password'); BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = role_name) THEN EXECUTE format('CREATE ROLE %I LOGIN PASSWORD %L', role_name, role_password); ELSE EXECUTE format('ALTER ROLE %I LOGIN PASSWORD %L', role_name, role_password); END IF; END \$\$;"
+    executable: /bin/bash
+  changed_when: false
+  when: app_stack_db_host == 'localhost'
+  become: true
+  become_user: postgres
+  no_log: "{{ app_stack_secure_logging }}"
+  environment:
+    db_user: "{{ db_user }}"
+    db_password: "{{ db_password }}"
+
+- name: Check whether the application PostgreSQL database exists
+  ansible.builtin.command:
+    argv:
+      - psql
+      - --dbname=postgres
+      - --tuples-only
+      - --no-align
+      - --command=SELECT 1 FROM pg_database WHERE datname = '{{ db_name }}';
+  changed_when: false
+  register: app_stack_database_exists
+  when: app_stack_db_host == 'localhost'
+  become: true
+  become_user: postgres
+
+- name: Create application PostgreSQL database
+  ansible.builtin.command:
+    argv:
+      - createdb
+      - --owner={{ db_user }}
+      - "{{ db_name }}"
+  when:
+    - app_stack_db_host == 'localhost'
+    - app_stack_database_exists.stdout | trim != '1'
+  become: true
+  become_user: postgres
+
+- name: Grant application database privileges
+  ansible.builtin.command:
+    argv:
+      - psql
+      - --dbname=postgres
+      - --command=GRANT ALL PRIVILEGES ON DATABASE "{{ db_name }}" TO "{{ db_user }}";
+  when: app_stack_db_host == 'localhost'
+  changed_when: false
+  become: true
+  become_user: postgres
+
+- name: Install database backup script
+  ansible.builtin.copy:
+    src: db-backup.sh
+    dest: /usr/local/bin/db-backup.sh
+    owner: root
+    group: "{{ app_stack_app_group }}" # noqa: R114 - group is role-defined configuration
+    mode: "0750"
+    backup: true
+
+- name: Schedule database backup
+  ansible.builtin.cron:
+    name: database_backup
+    user: root
+    job: /usr/local/bin/db-backup.sh {{ db_name }} {{ db_host }}
+    hour: "2"
+    minute: "30"

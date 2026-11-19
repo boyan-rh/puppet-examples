@@ -1,0 +1,46 @@
+---
+- name: Install Python runtime and build dependencies
+  ansible.builtin.package:
+    name:
+      - "{{ app_stack_python_version }}" # noqa: R114 - package name is role-defined configuration
+      - "{{ app_stack_python_version }}-pip" # noqa: R114 - package name is role-defined configuration
+      - "{{ app_stack_python_version }}-venv" # noqa: R114 - package name is role-defined configuration
+      - "{{ app_stack_python_version }}-dev" # noqa: R114 - package name is role-defined configuration
+      - git
+      - build-essential
+      - curl
+      - logrotate
+    state: present
+
+- name: Create application system group
+  ansible.builtin.group:
+    name: "{{ app_stack_app_group }}" # noqa: R114 - group name is role-defined configuration
+    state: present
+    system: true
+
+- name: Create application system user
+  ansible.builtin.user:
+    name: "{{ app_stack_app_user }}" # noqa: R114 - user name is role-defined configuration
+    group: "{{ app_stack_app_group }}" # noqa: R114 - group is role-defined configuration
+    home: "{{ app_stack_app_dir }}" # noqa: R114 - home path is role-defined configuration
+    shell: /bin/bash
+    system: true
+    create_home: false
+    state: present
+
+- name: Create application log directory
+  ansible.builtin.file:
+    path: "{{ app_stack_log_dir }}" # noqa: R114 - path is role-defined configuration
+    owner: "{{ app_stack_app_user }}"
+    group: "{{ app_stack_app_group }}"
+    mode: "0755"
+    state: directory
+
+- name: Render application logrotate configuration
+  ansible.builtin.template:
+    src: logrotate.conf.j2
+    dest: /etc/logrotate.d/{{ app_stack_app_name }} # noqa: R114 - path is role-defined configuration
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true

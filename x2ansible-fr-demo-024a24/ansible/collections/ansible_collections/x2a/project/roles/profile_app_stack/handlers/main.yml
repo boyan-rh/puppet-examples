@@ -1,0 +1,9 @@
+---
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart application
+  ansible.builtin.service:
+    name: "{{ app_stack_app_name }}" # noqa: R114 - service name is role-defined configuration
+    state: restarted

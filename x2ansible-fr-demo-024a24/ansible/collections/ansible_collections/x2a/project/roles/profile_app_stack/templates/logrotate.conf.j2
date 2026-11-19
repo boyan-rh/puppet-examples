@@ -1,0 +1,13 @@
+{{ app_stack_log_dir }}/*.log {
+    daily
+    rotate {{ app_stack_log_rotate_count }}
+    missingok
+    notifempty
+    compress
+    delaycompress
+    maxsize {{ app_stack_log_max_size }}
+    sharedscripts
+    postrotate
+        systemctl reload {{ app_stack_app_name }} 2>/dev/null || true
+    endscript
+}
