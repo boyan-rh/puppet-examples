@@ -1,0 +1,54 @@
+---
+- name: Validate selected firewall provider
+  ansible.builtin.assert:
+    that:
+      - profile_haproxy_firewall_provider in ['firewalld', 'ufw', 'none']
+    fail_msg: "Unsupported HAProxy firewall provider: {{ profile_haproxy_firewall_provider }}"
+
+- name: Install firewalld
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+  when: profile_haproxy_firewall_provider == 'firewalld'
+
+- name: Open HAProxy ports with firewalld
+  ansible.posix.firewalld:
+    port: "{{ item_profile_haproxy }}/tcp"
+    zone: "{{ profile_haproxy_firewall_zone }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  when: profile_haproxy_firewall_provider == 'firewalld'
+  loop: "{{ profile_haproxy_firewall_ports }}"
+  loop_control:
+    loop_var: item_profile_haproxy
+
+- name: Install UFW
+  ansible.builtin.package:
+    name:
+      - ufw
+    state: present
+  when: profile_haproxy_firewall_provider == 'ufw'
+
+- name: Allow HAProxy ports with UFW # noqa: R101 - port is from the role default firewall-port list, not user input
+  ansible.builtin.command:
+    argv:
+      - ufw
+      - allow
+      - "{{ item_profile_haproxy }}/tcp"
+  when: profile_haproxy_firewall_provider == 'ufw'
+  changed_when: "'Skipping adding existing rule' not in profile_haproxy_ufw_allow.stdout"
+  loop: "{{ profile_haproxy_firewall_ports }}"
+  loop_control:
+    loop_var: item_profile_haproxy
+  register: profile_haproxy_ufw_allow
+
+- name: Enable UFW
+  ansible.builtin.command:
+    argv:
+      - ufw
+      - --force
+      - enable
+  when: profile_haproxy_firewall_provider == 'ufw'
+  changed_when: "'Firewall is active' not in profile_haproxy_ufw_enable.stdout"
+  register: profile_haproxy_ufw_enable

@@ -1,0 +1,47 @@
+---
+# Unsupported: config, service, statistics, runtime-path, static-file, backend, firewall,
+# UFW, SELinux, and statistics-auth checks require unvalidated placeholder values or state.
+# Systemd daemon-reload is an action, not a read-only verification check.
+- name: Verify profile_haproxy pre-flight expectations
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Gather installed package facts for HAProxy package verification
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Assert that the required HAProxy package is installed
+      ansible.builtin.assert:
+        that:
+          - "'haproxy' in ansible_facts['packages']"
+        fail_msg: Required HAProxy package is not installed.
+        success_msg: Required HAProxy package is installed.
+
+    - name: Run the HAProxy binary version diagnostic
+      ansible.builtin.command:
+        argv:
+          - haproxy
+          - -v
+      changed_when: false
+      register: profile_haproxy_binary_version
+
+    - name: Assert that the HAProxy binary is available
+      ansible.builtin.assert:
+        that:
+          - profile_haproxy_binary_version['rc'] == 0
+        fail_msg: HAProxy binary is not available.
+        success_msg: HAProxy binary is available.
+
+    - name: Verify HAProxy HTTP frontend listener on port 80
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 80
+        state: started
+        timeout: 5
+
+    - name: Verify HAProxy HTTPS frontend listener on port 443
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 443
+        state: started
+        timeout: 5

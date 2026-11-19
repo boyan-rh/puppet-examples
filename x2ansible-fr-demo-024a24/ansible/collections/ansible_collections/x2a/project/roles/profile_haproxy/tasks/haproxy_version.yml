@@ -1,0 +1,16 @@
+---
+- name: Collect HAProxy version
+  ansible.builtin.command:
+    argv:
+      - haproxy
+      - -v
+  changed_when: false
+  failed_when: false
+  register: profile_haproxy_version_command
+
+- name: Set HAProxy version fact # noqa: L039 - command result is registered by the preceding task and must be parsed for the version fact
+  ansible.builtin.set_fact: # noqa: M005 - parsing the preceding registered command result is required to derive the version fact
+    profile_haproxy_version: >-
+      {{ profile_haproxy_version_command.stdout |
+        regex_search('version\\s+(\\d+\\.\\d+\\.\\d+)', '\\1') |
+        default('', true) }}

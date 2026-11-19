@@ -1,0 +1,44 @@
+---
+- name: Validate inventory source for discovered application servers
+  ansible.builtin.assert:
+    that:
+      - profile_haproxy_discovery_inventory_group | length > 0
+      - groups[profile_haproxy_discovery_inventory_group] | default([]) | length > 0
+    fail_msg: >-
+      Discovery is enabled but no application hosts were found in the configured
+      inventory group. Populate inventory or CMDB-derived host variables.
+
+- name: Build discovered API backend member definitions # noqa: L039 - accumulator is intentionally initialized with default([]) on its first loop iteration
+  ansible.builtin.set_fact:
+    profile_haproxy_discovered_api_servers: >-
+      {{ (profile_haproxy_discovered_api_servers | default([])) +
+        [{'name': 'api-' ~ item_profile_haproxy,
+          'address': hostvars[item_profile_haproxy]['ansible_host'] | default(item_profile_haproxy),
+          'port': hostvars[item_profile_haproxy]['profile_haproxy_app_port'] | default(8080),
+          'options': 'check inter 10s'}] }}
+  loop: "{{ groups[profile_haproxy_discovery_inventory_group] }}"
+  loop_control:
+    loop_var: item_profile_haproxy
+
+- name: Publish discovered API members for downstream configuration # noqa: L032 - discovered inventory members intentionally replace the default API backend
+  ansible.builtin.set_fact: # noqa: L039 - API server members are registered by the preceding discovery task
+    profile_haproxy_discovered_backends:
+      api:
+        balance: roundrobin
+        port: "{{ profile_haproxy_discovered_api_servers[0]['port'] }}"
+        servers: "{{ profile_haproxy_discovered_api_servers }}"
+        health_check: httpchk
+        health_interval: 10s
+        ssl_enabled: false
+    profile_haproxy_backends: >- # noqa: L093 - discovered inventory members must override the default backend for downstream configuration
+      {{ profile_haproxy_backends | combine(
+          {'api': {
+            'balance': 'roundrobin',
+            'port': profile_haproxy_discovered_api_servers[0]['port'],
+            'servers': profile_haproxy_discovered_api_servers,
+            'health_check': 'httpchk',
+            'health_interval': '10s',
+            'ssl_enabled': false
+          }},
+          recursive=True
+        ) }}

@@ -1,0 +1,63 @@
+---
+- name: Render HAProxy main configuration
+  ansible.builtin.template:
+    src: haproxy.cfg.j2
+    dest: "{{ profile_haproxy_config_file }}" # noqa: R114 - path comes from role defaults or OS vars, not user input
+    owner: root
+    group: "{{ profile_haproxy_group }}"
+    mode: "0640"
+    backup: true
+  notify: Restart HAProxy
+  no_log: "{{ profile_haproxy_secure_logging }}"
+
+- name: Render HAProxy backend configuration fragments
+  ansible.builtin.template:
+    src: backend.conf.j2
+    dest: "{{ profile_haproxy_config_dir }}/conf.d/{{ item_profile_haproxy['key'] }}.cfg" # noqa: R114 - path uses role-defined backend mapping
+    owner: root
+    group: "{{ profile_haproxy_group }}"
+    mode: "0640"
+    backup: true
+  loop: "{{ profile_haproxy_backends | dict2items }}"
+  loop_control:
+    loop_var: item_profile_haproxy
+  notify: Restart HAProxy
+  vars:
+    backend_name: "{{ item_profile_haproxy['key'] }}"
+    backend_config: "{{ item_profile_haproxy['value'] }}"
+
+- name: Create HAProxy error page directory
+  ansible.builtin.file:
+    path: "{{ profile_haproxy_config_dir }}/errors" # noqa: R114 - path comes from role defaults or OS vars, not user input
+    owner: root
+    group: "{{ profile_haproxy_group }}"
+    mode: "0755"
+    state: directory
+
+- name: Deploy HAProxy error pages
+  ansible.builtin.copy:
+    src: haproxy_errors/{{ item_profile_haproxy }}.http
+    dest: "{{ profile_haproxy_config_dir }}/errors/{{ item_profile_haproxy }}.http" # noqa: R114 - path uses a fixed role-defined error-page list
+    owner: root
+    group: "{{ profile_haproxy_group }}"
+    mode: "0644"
+    backup: true
+  loop:
+    - "503"
+    - "408"
+  loop_control:
+    loop_var: item_profile_haproxy
+  notify: Restart HAProxy
+
+- name: Render HAProxy stick-table configuration
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible
+      stick-table type ip size {{ profile_haproxy_stick_table_size }} expire {{ profile_haproxy_stick_table_expire }}
+    dest: "{{ profile_haproxy_config_dir }}/conf.d/stick-tables.cfg" # noqa: R114 - path comes from role defaults or OS vars, not user input
+    owner: root
+    group: "{{ profile_haproxy_group }}"
+    mode: "0640"
+    backup: true
+  when: profile_haproxy_stick_table_enabled | bool
+  notify: Restart HAProxy
